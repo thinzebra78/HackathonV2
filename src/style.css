@@ -1,19 +1,21 @@
 :root {
-  --bg: #f7f8fb;
-  --surface: #ffffff;
-  --surface-soft: #f1f5f4;
-  --text: #1f2933;
-  --muted: #617083;
-  --border: #dbe3ea;
-  --accent: #0f766e;
-  --accent-strong: #0b5f59;
-  --amber: #c27803;
-  --coral: #d95f4f;
-  --indigo: #4f46e5;
-  --success: #16794d;
-  --danger: #bd3d36;
-  --shadow: 0 18px 45px rgba(31, 41, 51, 0.08);
-  --radius: 8px;
+  --bg: #0077b6;
+  --surface: rgba(255, 255, 255, 0.14);
+  --surface-strong: rgba(255, 255, 255, 0.22);
+  --surface-solid: #ffffff;
+  --text: #ffffff;
+  --text-dark: #07233f;
+  --muted: rgba(255, 255, 255, 0.78);
+  --muted-dark: #54708b;
+  --border: rgba(255, 255, 255, 0.28);
+  --accent: #facc15;
+  --accent-strong: #f59e0b;
+  --blue-button: #38bdf8;
+  --green: #22c55e;
+  --green-dark: #16a34a;
+  --danger: #ef4444;
+  --shadow: 0 20px 60px rgba(0, 34, 64, 0.26);
+  --radius: 16px;
   --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
   font-family: var(--font);
@@ -34,26 +36,27 @@ body {
   min-height: 100svh;
   margin: 0;
   background:
-    linear-gradient(90deg, rgba(15, 118, 110, 0.05), transparent 40%),
-    linear-gradient(180deg, #ffffff 0, var(--bg) 360px);
+    radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.26), transparent 26rem),
+    linear-gradient(180deg, #006994 0%, #0096c7 34%, #48cae4 68%, #90e0ef 100%);
+  background-attachment: fixed;
 }
 
 button {
   min-height: 42px;
   border: 0;
-  border-radius: var(--radius);
+  border-radius: 12px;
   font: inherit;
   cursor: pointer;
 }
 
 button:focus-visible {
-  outline: 3px solid rgba(15, 118, 110, 0.28);
+  outline: 3px solid rgba(250, 204, 21, 0.5);
   outline-offset: 2px;
 }
 
 button:disabled {
   cursor: not-allowed;
-  opacity: 0.55;
+  opacity: 0.58;
 }
 
 h1,
@@ -99,15 +102,15 @@ ol {
 }
 
 .brand-mark {
-  width: 54px;
-  height: 54px;
+  width: 58px;
+  height: 58px;
   display: grid;
   place-items: center;
-  border-radius: var(--radius);
+  border-radius: 14px;
   color: white;
-  background: var(--skin, var(--accent));
-  box-shadow: 0 10px 25px color-mix(in srgb, var(--skin, var(--accent)) 28%, transparent);
-  font-weight: 800;
+  background: linear-gradient(135deg, var(--skin, #ef4444), #fb7185);
+  box-shadow: 0 16px 32px rgba(0, 34, 64, 0.24);
+  font-weight: 850;
 }
 
 .brand-group h1,
@@ -117,7 +120,7 @@ ol {
 }
 
 .brand-group h1 {
-  font-size: 1.75rem;
+  font-size: 1.85rem;
   line-height: 1.05;
 }
 
@@ -125,7 +128,7 @@ ol {
 .metric-label {
   color: var(--muted);
   font-size: 0.76rem;
-  font-weight: 800;
+  font-weight: 850;
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -133,16 +136,18 @@ ol {
 .top-metrics {
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 10px;
 }
 
 .metric {
-  min-width: 88px;
-  padding: 10px 12px;
+  min-width: 92px;
+  padding: 11px 13px;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
   text-align: right;
+  backdrop-filter: blur(10px);
 }
 
 .metric span {
@@ -154,13 +159,14 @@ ol {
 .metric strong {
   display: block;
   margin-top: 2px;
-  font-size: 1.15rem;
+  color: white;
+  font-size: 1.18rem;
 }
 
 .setup-layout,
 .practice-layout {
   display: grid;
-  gap: 18px;
+  gap: 20px;
 }
 
 .setup-layout {
@@ -175,9 +181,10 @@ ol {
 
 .panel {
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  border-radius: 20px;
+  background: var(--surface);
   box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
 }
 
 .selector-panel,
@@ -186,18 +193,19 @@ ol {
 .shop-panel,
 .course-rail,
 .practice-panel {
-  padding: 18px;
+  padding: 20px;
 }
 
 .panel-heading {
   display: grid;
-  gap: 4px;
+  gap: 5px;
 }
 
 .panel-heading h2,
 .profile-panel h2,
 .rail-course h2 {
-  font-size: 1rem;
+  color: white;
+  font-size: 1.02rem;
   line-height: 1.2;
 }
 
@@ -208,23 +216,28 @@ ol {
 .grade-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
+  gap: 9px;
   margin-top: 14px;
 }
 
 .grade-chip,
 .segmented-control button {
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
-  font-weight: 750;
+  border: 1px solid rgba(255, 255, 255, 0.48);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--text-dark);
+  font-weight: 800;
+}
+
+.grade-chip:hover,
+.segmented-control button:hover {
+  background: white;
 }
 
 .grade-chip.is-selected,
 .segmented-control button.is-selected {
-  border-color: var(--accent);
+  border-color: rgba(255, 255, 255, 0.8);
   background: var(--accent);
-  color: white;
+  color: #071827;
 }
 
 .subject-list,
@@ -232,7 +245,7 @@ ol {
 .side-stack,
 .rail-unit-list {
   display: grid;
-  gap: 10px;
+  gap: 11px;
 }
 
 .subject-list {
@@ -241,27 +254,28 @@ ol {
 
 .subject-button {
   width: 100%;
-  min-height: 68px;
+  min-height: 70px;
   gap: 12px;
   padding: 12px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.36);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text-dark);
   text-align: left;
 }
 
 .subject-button.is-selected {
-  border-color: var(--subject-color);
-  box-shadow: inset 4px 0 0 var(--subject-color);
+  border-color: var(--accent);
+  background: white;
+  box-shadow: inset 5px 0 0 var(--green);
 }
 
 .subject-code {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   display: grid;
   place-items: center;
   flex: 0 0 auto;
-  border-radius: 999px;
+  border-radius: 50%;
   color: white;
   background: var(--subject-color);
   font-weight: 850;
@@ -274,7 +288,7 @@ ol {
 
 .subject-button small {
   margin-top: 3px;
-  color: var(--muted);
+  color: var(--muted-dark);
   font-size: 0.78rem;
   line-height: 1.25;
 }
@@ -286,7 +300,7 @@ ol {
 
 .course-hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 128px;
+  grid-template-columns: minmax(0, 1fr) 132px;
   gap: 18px;
   align-items: center;
 }
@@ -294,33 +308,39 @@ ol {
 .course-hero h1,
 .practice-header h1 {
   margin: 5px 0 8px;
+  color: white;
   font-size: clamp(1.8rem, 4vw, 3.6rem);
   line-height: 1.02;
+  text-shadow: 0 8px 24px rgba(0, 34, 64, 0.22);
 }
 
 .course-hero p,
-.outcome-band li,
 .profile-panel p,
-.shop-item p,
 .rail-unit-list p,
 .feedback-row p {
   color: var(--muted);
   line-height: 1.45;
 }
 
+.outcome-band li {
+  color: #e9f8ff;
+  line-height: 1.45;
+}
+
 .course-art {
-  width: 128px;
-  height: 136px;
+  width: 132px;
+  height: 140px;
   object-fit: contain;
+  filter: drop-shadow(0 16px 22px rgba(0, 34, 64, 0.22));
 }
 
 .course-toolbar {
   justify-content: space-between;
   gap: 18px;
   padding: 14px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface-soft);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .course-toolbar > div {
@@ -333,14 +353,14 @@ ol {
   margin-top: 8px;
   overflow: hidden;
   border-radius: 999px;
-  background: #dde6ed;
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .progress-track span {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--accent), var(--amber));
+  background: linear-gradient(90deg, var(--accent), var(--green));
 }
 
 .primary-button,
@@ -351,12 +371,12 @@ ol {
   justify-content: center;
   gap: 8px;
   white-space: nowrap;
-  font-weight: 800;
+  font-weight: 850;
 }
 
 .primary-button {
-  padding: 12px 16px;
-  color: white;
+  padding: 12px 17px;
+  color: #06213a;
   background: var(--accent);
 }
 
@@ -366,9 +386,13 @@ ol {
 
 .ghost-button {
   padding: 11px 14px;
-  border: 1px solid var(--border);
-  color: var(--text);
-  background: var(--surface);
+  border: 1px solid rgba(255, 255, 255, 0.46);
+  color: white;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.ghost-button:hover {
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .full-width {
@@ -391,21 +415,22 @@ ol {
 
 .unit-card {
   min-height: 112px;
-  padding: 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
+  padding: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.88);
+  color: var(--text-dark);
 }
 
 .unit-card > span,
 .rail-unit-list span {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   display: grid;
   place-items: center;
-  border-radius: 999px;
+  border-radius: 50%;
   color: white;
-  background: var(--muted);
+  background: #64748b;
   font-weight: 850;
   font-size: 0.85rem;
 }
@@ -418,28 +443,29 @@ ol {
 
 .unit-card p {
   margin-top: 8px;
-  color: var(--muted);
+  color: var(--muted-dark);
   font-size: 0.82rem;
 }
 
 .unit-card.is-current {
   border-color: var(--accent);
+  background: white;
 }
 
 .unit-card.is-current > span,
 .unit-card.is-complete > span {
-  background: var(--accent);
+  background: var(--green-dark);
 }
 
 .unit-card.is-complete {
-  background: #effaf6;
+  background: #ecfdf5;
 }
 
 .outcome-band {
   padding: 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: #fffdf7;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .outcome-band ul {
@@ -455,17 +481,17 @@ ol {
 
 .profile-panel {
   display: grid;
-  grid-template-columns: 72px minmax(0, 1fr);
+  grid-template-columns: 76px minmax(0, 1fr);
   gap: 14px;
 }
 
 .avatar {
-  width: 72px;
-  height: 88px;
+  width: 76px;
+  height: 90px;
   position: relative;
-  border-radius: var(--radius);
-  background: #f3dcc4;
   overflow: hidden;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.55);
 }
 
 .avatar::before,
@@ -481,14 +507,14 @@ ol {
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: #f7c978;
+  background: #fcd34d;
 }
 
 .avatar span {
   bottom: 10px;
-  width: 54px;
-  height: 38px;
-  border-radius: 16px 16px 8px 8px;
+  width: 56px;
+  height: 40px;
+  border-radius: 16px 16px 10px 10px;
   background: var(--skin);
 }
 
@@ -504,24 +530,26 @@ ol {
 .shop-item {
   gap: 10px;
   min-height: 78px;
-  padding: 10px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
+  padding: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text-dark);
 }
 
 .shop-item.is-active {
-  border-color: var(--accent);
-  background: #effaf6;
+  border-color: var(--green);
+  background: white;
+  box-shadow: inset 4px 0 0 var(--green);
 }
 
 .skin-swatch {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   flex: 0 0 auto;
   border-radius: 50%;
   background: var(--skin);
-  box-shadow: inset 0 0 0 4px rgba(255, 255, 255, 0.35);
+  box-shadow: inset 0 0 0 5px rgba(255, 255, 255, 0.34);
 }
 
 .shop-item div {
@@ -535,16 +563,22 @@ ol {
 
 .shop-item p,
 .shop-item small {
+  color: var(--muted-dark);
   font-size: 0.78rem;
 }
 
 .small-button {
   min-height: 34px;
   padding: 7px 10px;
-  border: 1px solid var(--border);
-  background: var(--surface-soft);
-  color: var(--text);
+  border: 1px solid #d7e4ee;
+  background: #e9f5ff;
+  color: var(--text-dark);
   font-size: 0.82rem;
+}
+
+.small-button:hover:not(:disabled) {
+  background: var(--blue-button);
+  color: white;
 }
 
 .course-rail {
@@ -565,18 +599,18 @@ ol {
 .rail-unit-list li {
   gap: 10px;
   padding: 10px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .rail-unit-list li.is-current {
   border-color: var(--accent);
-  background: #effaf6;
+  background: rgba(255, 255, 255, 0.24);
 }
 
 .rail-unit-list li.is-current span {
-  background: var(--accent);
+  background: var(--green-dark);
 }
 
 .practice-panel {
@@ -594,25 +628,25 @@ ol {
   grid-template-columns: repeat(2, 1fr);
   min-width: 230px;
   padding: 4px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface-soft);
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.16);
 }
 
 .segmented-control button {
-  border: 0;
   min-height: 36px;
+  border: 0;
 }
 
 .question-surface {
   padding: clamp(18px, 4vw, 34px);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.16);
 }
 
 .question-type {
-  color: var(--accent);
+  color: #fff7ad;
   font-weight: 850;
   text-transform: uppercase;
   font-size: 0.8rem;
@@ -620,6 +654,7 @@ ol {
 
 .question-surface h2 {
   margin-top: 12px;
+  color: white;
   font-size: clamp(1.7rem, 4vw, 3rem);
   line-height: 1.08;
 }
@@ -634,37 +669,37 @@ ol {
 .answer-button {
   min-height: 74px;
   padding: 14px;
-  border: 1px solid var(--border);
-  background: #fbfcfe;
-  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.52);
+  background: white;
+  color: var(--text-dark);
   font-size: 1.05rem;
-  font-weight: 800;
+  font-weight: 850;
   overflow-wrap: anywhere;
 }
 
 .answer-button:hover:not(:disabled) {
   border-color: var(--accent);
-  background: #effaf6;
+  background: #fef9c3;
 }
 
 .answer-button.is-correct {
-  border-color: var(--success);
-  background: #eaf8f0;
-  color: var(--success);
+  border-color: var(--green);
+  background: #dcfce7;
+  color: #166534;
 }
 
 .feedback-row {
   justify-content: space-between;
   gap: 16px;
   padding: 14px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface-soft);
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.13);
 }
 
 .feedback-row.has-feedback p {
-  color: var(--text);
-  font-weight: 700;
+  color: white;
+  font-weight: 750;
 }
 
 .practice-actions {
@@ -753,7 +788,7 @@ ol {
   }
 
   .avatar {
-    width: 64px;
-    height: 80px;
+    width: 66px;
+    height: 82px;
   }
 }
