@@ -435,26 +435,69 @@ function createMathQuestion(grade, difficulty) {
   let type = 'Number sense'
 
   if (grade === 0) {
-    const count = random(3, challenge ? 12 : 8)
-    prompt = `Count the objects: ${Array.from({ length: count }, () => 'o').join(' ')}`
-    answer = count
-    type = 'Counting'
+    const choice = random(1, 4)
+    if (choice === 1) {
+      const count = random(3, challenge ? 12 : 8)
+      prompt = `Count the objects: ${Array.from({ length: count }, () => 'o').join(' ')}`
+      answer = count
+      type = 'Counting'
+    } else if (choice === 2) {
+      const a = random(1, 9)
+      const b = random(1, 9)
+      prompt = `Which number is bigger: ${a} or ${b}?`
+      answer = Math.max(a, b)
+      type = 'Comparing numbers'
+    } else if (choice === 3) {
+      const a = random(1, 5)
+      const b = random(1, 5)
+      prompt = `${a} + ${b} = ?`
+      answer = a + b
+      type = 'Adding small numbers'
+    } else {
+      const start = random(1, 6)
+      prompt = `What number comes after ${start}?`
+      answer = start + 1
+      type = 'Number order'
+    }
   } else if (grade <= 2) {
     const a = random(4, challenge ? 40 : 20)
     const b = random(2, challenge ? 20 : 12)
-    if (Math.random() > 0.45) {
+    const choice = random(1, 6)
+    if (choice === 1) {
       prompt = `${a} + ${b} = ?`
       answer = a + b
       type = 'Addition'
-    } else {
+    } else if (choice === 2) {
       prompt = `${a} - ${Math.min(a, b)} = ?`
       answer = a - Math.min(a, b)
       type = 'Subtraction'
+    } else if (choice === 3) {
+      const missing = random(2, 9)
+      prompt = `${a} + ? = ${a + missing}`
+      answer = missing
+      type = 'Missing addend'
+    } else if (choice === 4) {
+      const tens = random(2, challenge ? 9 : 6)
+      const ones = random(0, 9)
+      prompt = `${tens} tens and ${ones} ones equals what number?`
+      answer = tens * 10 + ones
+      type = 'Place value'
+    } else if (choice === 5) {
+      const groups = random(2, 6)
+      prompt = `Count by 5s: what is 5 x ${groups}?`
+      answer = 5 * groups
+      type = 'Skip counting'
+    } else {
+      const total = random(10, challenge ? 40 : 25)
+      const part = random(2, total - 2)
+      prompt = `${total} - ? = ${part}`
+      answer = total - part
+      type = 'Missing subtrahend'
     }
   } else if (grade <= 5) {
     const a = random(3, challenge ? 16 : 12)
     const b = random(2, challenge ? 14 : 10)
-    const choice = random(1, 4)
+    const choice = random(1, 8)
     if (choice === 1) {
       prompt = `${a} x ${b} = ?`
       answer = a * b
@@ -467,16 +510,36 @@ function createMathQuestion(grade, difficulty) {
       prompt = `A rectangle is ${a} by ${b}. What is its area?`
       answer = a * b
       type = 'Area'
-    } else {
+    } else if (choice === 4) {
       prompt = `What is one half of ${a * 2}?`
       answer = a
+      type = 'Fractions'
+    } else if (choice === 5) {
+      prompt = `A rectangle is ${a} by ${b}. What is its perimeter?`
+      answer = 2 * (a + b)
+      type = 'Perimeter'
+    } else if (choice === 6) {
+      const base = random(12, challenge ? 90 : 60)
+      prompt = `Round ${base} to the nearest ten.`
+      answer = Math.round(base / 10) * 10
+      type = 'Rounding'
+    } else if (choice === 7) {
+      const groupSize = random(3, 9)
+      const groups = random(2, 8)
+      prompt = `${groups} packs have ${groupSize} items each. How many items total?`
+      answer = groupSize * groups
+      type = 'Word problems'
+    } else {
+      const whole = b * 4
+      prompt = `What is 3/4 of ${whole}?`
+      answer = b * 3
       type = 'Fractions'
     }
   } else if (grade <= 8) {
     const a = random(2, challenge ? 12 : 8)
     const b = random(4, challenge ? 24 : 16)
     const x = random(2, challenge ? 14 : 9)
-    const choice = random(1, 4)
+    const choice = random(1, 8)
     if (choice === 1) {
       prompt = `Solve: ${a}x + ${b} = ${a * x + b}`
       answer = x
@@ -489,16 +552,36 @@ function createMathQuestion(grade, difficulty) {
       prompt = `A ratio is ${a}:${b}. What is the total parts?`
       answer = a + b
       type = 'Ratios'
-    } else {
+    } else if (choice === 4) {
       prompt = `Find the slope from (0, ${b}) to (2, ${b + 2 * a}).`
       answer = a
       type = 'Linear relationships'
+    } else if (choice === 5) {
+      prompt = `Find the median of ${a}, ${b}, and ${a + b}.`
+      answer = Math.max(a, b)
+      type = 'Statistics'
+    } else if (choice === 6) {
+      const total = random(6, 12)
+      const favorable = random(1, total - 1)
+      prompt = `${favorable} out of ${total} tiles are blue. How many are not blue?`
+      answer = total - favorable
+      type = 'Probability'
+    } else if (choice === 7) {
+      const rate = random(2, 9)
+      const hours = random(3, 8)
+      prompt = `A bike travels ${rate * hours} miles in ${hours} hours. What is the unit rate?`
+      answer = rate
+      type = 'Unit rates'
+    } else {
+      prompt = `Solve: ${a}x - ${b} = ${a * x - b}`
+      answer = x
+      type = 'Equations'
     }
   } else {
     const a = random(2, challenge ? 9 : 6)
     const b = random(2, challenge ? 12 : 8)
     const x = random(2, challenge ? 10 : 7)
-    const choice = random(1, 4)
+    const choice = random(1, 8)
     if (choice === 1) {
       prompt = `Solve: ${a}x - ${b} = ${a * x - b}`
       answer = x
@@ -511,10 +594,26 @@ function createMathQuestion(grade, difficulty) {
       prompt = `If f(x) = ${a}x + ${b}, what is f(${x})?`
       answer = a * x + b
       type = 'Functions'
-    } else {
+    } else if (choice === 4) {
       prompt = `A value grows from ${b * 10} to ${b * 10 + a * 10}. What is the increase?`
       answer = a * 10
       type = 'Modeling'
+    } else if (choice === 5) {
+      prompt = `What common factor do ${a * b} and ${a * x} share?`
+      answer = a
+      type = 'Factoring'
+    } else if (choice === 6) {
+      prompt = `If g(x) = x squared - ${a}, what is g(${b})?`
+      answer = b * b - a
+      type = 'Quadratics'
+    } else if (choice === 7) {
+      prompt = `A sequence starts at ${a} and adds ${b}. What is term 5?`
+      answer = a + 4 * b
+      type = 'Sequences'
+    } else {
+      prompt = `What is the range of the values ${a}, ${b}, ${x}, and ${a + b + x}?`
+      answer = a + b + x - Math.min(a, b, x)
+      type = 'Statistics'
     }
   }
 
@@ -560,53 +659,100 @@ function shuffle(items) {
 const elaQuestionBank = [
   q(0, 0, 'Letters', 'Which letter starts the word "sun"?', 'S', ['S', 'M', 'T', 'B']),
   q(0, 0, 'Rhyming', 'Which word rhymes with "cat"?', 'hat', ['hat', 'dog', 'sun', 'pen']),
+  q(0, 0, 'Letters', 'Which letter starts the word "ball"?', 'B', ['B', 'D', 'P', 'T']),
+  q(0, 1, 'Story order', 'What usually comes first in a story?', 'beginning', ['beginning', 'ending', 'author bio', 'page number']),
+  q(0, 1, 'Sounds', 'Which word starts with the same sound as "moon"?', 'map', ['map', 'sun', 'fish', 'cup']),
   q(1, 2, 'Phonics', 'Choose the word with a long a sound.', 'cake', ['cake', 'cat', 'map', 'ran']),
   q(1, 2, 'Sentence sense', 'Which is a complete sentence?', 'The dog runs.', ['The dog runs.', 'Runs fast', 'The dog', 'Fast blue']),
+  q(1, 2, 'Phonics', 'Which word has the sh sound?', 'ship', ['ship', 'sip', 'chip', 'tip']),
+  q(1, 2, 'Vocabulary', 'Which word means almost the same as "big"?', 'large', ['large', 'tiny', 'quiet', 'cold']),
+  q(2, 3, 'Grammar', 'Which word is a noun?', 'teacher', ['teacher', 'quickly', 'blue', 'jump']),
   q(2, 3, 'Text features', 'What helps readers find a topic quickly in a nonfiction book?', 'index', ['index', 'dialogue', 'stanza', 'rhyme']),
+  q(2, 4, 'Comprehension', 'A detail in a text should...', 'support the main idea', ['support the main idea', 'replace the title', 'hide the topic', 'change the author']),
   q(3, 4, 'Vocabulary', 'What does the prefix "pre-" mean?', 'before', ['before', 'again', 'not', 'after']),
+  q(3, 4, 'Vocabulary', 'What does the suffix "-less" mean?', 'without', ['without', 'full of', 'before', 'again']),
   q(3, 5, 'Comprehension', 'The main idea is the...', 'most important point', ['most important point', 'last sentence only', 'author name', 'page number']),
+  q(4, 5, 'Grammar', 'Which sentence uses a conjunction?', 'I packed lunch, but I forgot water.', ['I packed lunch, but I forgot water.', 'The tall tree.', 'Running quickly.', 'Blue and bright.']),
   q(4, 5, 'Writing', 'Which sentence uses evidence?', 'The text says that the bridge opened in 1937.', ['The text says that the bridge opened in 1937.', 'I like bridges.', 'This is cool.', 'Everyone knows it.']),
   q(5, 6, 'Figurative language', 'A comparison using "like" or "as" is a...', 'simile', ['simile', 'theme', 'noun', 'summary']),
+  q(5, 6, 'Text structure', 'A cause-and-effect text explains...', 'why something happened and what followed', ['why something happened and what followed', 'only character names', 'alphabetical definitions', 'random dates']),
+  q(5, 7, 'Point of view', 'First-person narration often uses...', 'I and me', ['I and me', 'he and she only', 'chapter titles', 'footnotes']),
   q(6, 7, 'Analysis', 'Tone means the author\'s...', 'attitude toward the subject', ['attitude toward the subject', 'alphabetical order', 'page count', 'setting only']),
+  q(6, 8, 'Theme', 'A theme is best described as...', 'a message about life', ['a message about life', 'the page count', 'the author photo', 'a punctuation mark']),
+  q(7, 8, 'Grammar', 'A semicolon can connect...', 'two closely related independent clauses', ['two closely related independent clauses', 'a noun and an adjective', 'only two verbs', 'a title and subtitle']),
   q(7, 8, 'Argument', 'A strong claim should be...', 'debatable and specific', ['debatable and specific', 'a random fact', 'a question only', 'one word']),
   q(8, 9, 'Source use', 'Which source is usually most credible for population data?', 'a government census page', ['a government census page', 'an anonymous comment', 'a movie poster', 'a shopping ad']),
+  q(8, 10, 'Media literacy', 'A biased source may...', 'favor one side unfairly', ['favor one side unfairly', 'include no viewpoint', 'always be a dictionary', 'avoid all word choice']),
   q(9, 10, 'Rhetoric', 'Ethos appeals to...', 'credibility', ['credibility', 'sound effects', 'chronology', 'setting']),
+  q(9, 10, 'Rhetoric', 'Pathos appeals to...', 'emotion', ['emotion', 'calendar order', 'font size', 'paragraph count']),
+  q(9, 11, 'Poetry', 'Imagery helps readers...', 'picture sensory details', ['picture sensory details', 'skip the text', 'count pages', 'find only dates']),
   q(10, 11, 'Literature', 'Symbolism is when an object...', 'represents a larger idea', ['represents a larger idea', 'lists every event', 'names the speaker', 'counts syllables']),
+  q(10, 12, 'Analysis', 'A motif is...', 'a repeated element with meaning', ['a repeated element with meaning', 'a spelling error', 'a page heading', 'a source list']),
   q(11, 12, 'Research', 'A synthesis essay should...', 'combine ideas from multiple sources', ['combine ideas from multiple sources', 'copy one source exactly', 'avoid evidence', 'use only opinions']),
+  q(11, 12, 'Argument', 'A counterclaim is...', 'an opposing argument', ['an opposing argument', 'a repeated title', 'a source citation style', 'a sentence fragment']),
   q(12, 12, 'Style', 'Concise writing avoids...', 'unnecessary words', ['unnecessary words', 'clear verbs', 'specific nouns', 'evidence']),
+  q(12, 12, 'Research', 'A strong thesis should be...', 'specific and arguable', ['specific and arguable', 'a single vague word', 'only a quotation', 'hidden in the bibliography']),
 ]
 
 const scienceQuestionBank = [
   q(0, 0, 'Observation', 'Which tool can help you see something tiny?', 'magnifying glass', ['magnifying glass', 'ruler', 'calendar', 'map']),
   q(0, 1, 'Weather', 'Rain, snow, wind, and sunshine describe...', 'weather', ['weather', 'gravity', 'fiction', 'money']),
+  q(0, 0, 'Senses', 'Which sense helps you hear a bell?', 'hearing', ['hearing', 'taste', 'touch', 'sight']),
+  q(0, 1, 'Motion', 'A push or pull is a...', 'force', ['force', 'habitat', 'shadow', 'season']),
+  q(1, 2, 'Light', 'A shadow forms when light is...', 'blocked', ['blocked', 'eaten', 'frozen', 'counted']),
   q(1, 2, 'Life science', 'What do plants need to grow?', 'water and light', ['water and light', 'plastic and glue', 'sand only', 'darkness only']),
+  q(1, 3, 'Animals', 'A habitat is...', 'where an organism lives', ['where an organism lives', 'a type of weather', 'a metal tool', 'a measuring cup']),
   q(2, 3, 'Matter', 'Water is a liquid because it...', 'takes the shape of its container', ['takes the shape of its container', 'keeps one fixed shape', 'is always invisible', 'cannot move']),
+  q(2, 4, 'Matter', 'Which property describes how heavy something is?', 'mass', ['mass', 'color', 'shape', 'sound']),
   q(3, 4, 'Forces', 'A magnet can attract objects made with...', 'iron', ['iron', 'paper', 'wood', 'rubber']),
+  q(3, 5, 'Life cycles', 'A butterfly changes from a caterpillar through...', 'metamorphosis', ['metamorphosis', 'evaporation', 'erosion', 'condensation']),
   q(4, 5, 'Earth systems', 'Weathering is the process that...', 'breaks rocks into smaller pieces', ['breaks rocks into smaller pieces', 'makes stars', 'stops gravity', 'creates electricity']),
+  q(4, 6, 'Energy', 'Energy can be transferred as heat, light, sound, or...', 'motion', ['motion', 'fiction', 'grammar', 'currency']),
   q(5, 6, 'Ecosystems', 'In a food web, arrows usually show...', 'energy flow', ['energy flow', 'map direction', 'weather speed', 'age']),
+  q(5, 7, 'Space', 'Earth rotates once about every...', '24 hours', ['24 hours', '7 days', '30 days', '365 years']),
   q(6, 7, 'Earth science', 'Tectonic plates move on top of the...', 'mantle', ['mantle', 'cloud layer', 'moon', 'outer space']),
+  q(6, 8, 'Weather', 'Air pressure is measured with a...', 'barometer', ['barometer', 'microscope', 'spring scale', 'telescope']),
   q(7, 8, 'Cells', 'The nucleus of a cell stores...', 'genetic information', ['genetic information', 'rain water', 'sound waves', 'sunlight']),
+  q(7, 9, 'Genetics', 'An inherited trait is passed from...', 'parents to offspring', ['parents to offspring', 'rocks to rivers', 'weather to maps', 'books to shelves']),
   q(8, 9, 'Physical science', 'Acceleration means a change in...', 'velocity', ['velocity', 'mass only', 'color only', 'volume only']),
+  q(8, 10, 'Chemistry', 'A chemical reaction creates...', 'new substances', ['new substances', 'only bigger pieces', 'no changes', 'only shadows']),
   q(9, 10, 'Biology', 'DNA is best described as...', 'instructions for traits', ['instructions for traits', 'a type of rock', 'a weather pattern', 'a force']),
+  q(9, 11, 'Ecology', 'Carrying capacity is the...', 'largest population an environment can support', ['largest population an environment can support', 'speed of an object', 'temperature of boiling water', 'number of protons']),
   q(10, 11, 'Chemistry', 'Atoms with the same number of protons are the same...', 'element', ['element', 'solution', 'mixture', 'force']),
+  q(10, 12, 'Chemistry', 'A catalyst changes the rate of a reaction without being...', 'used up', ['used up', 'measured', 'heated', 'named']),
   q(11, 12, 'Physics', 'Momentum depends on mass and...', 'velocity', ['velocity', 'temperature', 'color', 'shape']),
+  q(11, 12, 'Physics', 'Newton\'s first law describes...', 'inertia', ['inertia', 'photosynthesis', 'plate tectonics', 'evaporation']),
   q(12, 12, 'Environment', 'Biodiversity means the variety of...', 'living things in an area', ['living things in an area', 'cloud shapes', 'road signs', 'metal tools']),
+  q(12, 12, 'Environment', 'A renewable resource can be...', 'replaced naturally over time', ['replaced naturally over time', 'used only once forever', 'made only from plastic', 'found only in cities']),
 ]
 
 const historyQuestionBank = [
   q(0, 0, 'Community', 'A rule is made to help people...', 'stay safe and fair', ['stay safe and fair', 'hide maps', 'stop learning', 'forget names']),
+  q(0, 1, 'Community', 'A community helper who puts out fires is a...', 'firefighter', ['firefighter', 'author', 'astronaut', 'painter']),
   q(1, 2, 'Maps', 'A map key explains...', 'symbols on a map', ['symbols on a map', 'song lyrics', 'animal sounds', 'math answers']),
+  q(1, 2, 'Citizenship', 'Voting is one way people...', 'make choices in a democracy', ['make choices in a democracy', 'measure temperature', 'plant seeds', 'draw maps only']),
   q(2, 3, 'Economics', 'People use money to...', 'buy goods and services', ['buy goods and services', 'measure rain', 'grow sunlight', 'write laws by itself']),
+  q(2, 3, 'Geography', 'A compass rose shows...', 'directions', ['directions', 'prices', 'laws', 'birthdays']),
   q(3, 4, 'Sources', 'A primary source is created...', 'during the time being studied', ['during the time being studied', 'only in fiction', 'without evidence', 'by a calculator']),
+  q(3, 5, 'Geography', 'Lines of latitude measure distance north or south of the...', 'Equator', ['Equator', 'Prime Meridian', 'North Pole only', 'Pacific Ocean']),
   q(4, 5, 'U.S. history', 'The Declaration of Independence was approved in...', '1776', ['1776', '1492', '1865', '1918']),
+  q(4, 6, 'Government', 'A constitution is a...', 'plan for government', ['plan for government', 'weather report', 'trade route', 'tax receipt']),
   q(5, 6, 'Civics', 'The Constitution begins with the words...', 'We the People', ['We the People', 'Once upon a time', 'Dear Reader', 'Chapter One']),
+  q(5, 7, 'U.S. history', 'The Louisiana Purchase doubled the size of the...', 'United States', ['United States', 'Roman Empire', 'Nile River', 'United Nations']),
   q(6, 7, 'Ancient history', 'The Nile River was central to ancient...', 'Egypt', ['Egypt', 'Japan', 'Canada', 'Brazil']),
+  q(6, 7, 'Ancient history', 'Cuneiform first developed in...', 'Mesopotamia', ['Mesopotamia', 'Australia', 'Canada', 'Antarctica']),
   q(7, 8, 'World history', 'The Silk Road was mainly a network for...', 'trade and cultural exchange', ['trade and cultural exchange', 'volcano research only', 'space travel', 'telephone calls']),
+  q(7, 9, 'World history', 'The Magna Carta limited the power of the...', 'king', ['king', 'newspaper', 'factory', 'railroad']),
   q(8, 9, 'U.S. history', 'The U.S. Civil War ended in...', '1865', ['1865', '1776', '1914', '1945']),
+  q(8, 10, 'Civics', 'The Bill of Rights is the first ten amendments to the...', 'U.S. Constitution', ['U.S. Constitution', 'Declaration of Independence', 'Mayflower Compact', 'Treaty of Paris']),
   q(9, 10, 'World history', 'The Industrial Revolution changed society through...', 'machine production', ['machine production', 'stone tools only', 'less trade', 'no cities']),
+  q(9, 11, 'World history', 'The Renaissance began in Europe with renewed interest in...', 'classical learning', ['classical learning', 'factory assembly lines', 'space stations', 'television advertising']),
   q(10, 11, 'Modern history', 'World War II ended in...', '1945', ['1945', '1918', '1969', '1989']),
+  q(10, 12, 'Modern history', 'The Cold War was mainly a rivalry between the U.S. and the...', 'Soviet Union', ['Soviet Union', 'Roman Republic', 'Mongol Empire', 'Aztec Empire']),
   q(11, 12, 'Government', 'Separation of powers means...', 'government power is divided among branches', ['government power is divided among branches', 'one branch holds all power', 'courts collect taxes only', 'citizens cannot vote']),
+  q(11, 12, 'Government', 'Federalism divides power between national and...', 'state governments', ['state governments', 'newspapers', 'private banks', 'weather stations']),
   q(12, 12, 'Economics', 'Inflation means...', 'overall prices rise over time', ['overall prices rise over time', 'all prices disappear', 'money becomes weather', 'trade stops forever']),
+  q(12, 12, 'Economics', 'Opportunity cost is...', 'the next best choice given up', ['the next best choice given up', 'a tax on imports', 'a type of election', 'a court opinion']),
 ]
 
 function q(min, max, type, prompt, answer, options) {
