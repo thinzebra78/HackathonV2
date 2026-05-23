@@ -154,6 +154,12 @@ const defaultState = {
   skinUpgrades: {
     classic: 1,
   },
+  minigameUnlocked: false,
+  minigameOpen: false,
+  minigameQuestions: [],
+  minigameAnswers: {},
+  minigameSubmitted: false,
+  minigameResult: '',
   progress: {},
 }
 
@@ -229,6 +235,22 @@ app.addEventListener('click', (event) => {
   if (action === 'upgrade-skin') {
     upgradeSkin(button.dataset.skin)
   }
+
+  if (action === 'open-minigame') {
+    openMinigame()
+  }
+
+  if (action === 'close-minigame') {
+    closeMinigame()
+  }
+
+  if (action === 'select-minigame-answer') {
+    selectMinigameAnswer(Number(button.dataset.index), button.dataset.answer)
+  }
+
+  if (action === 'submit-minigame') {
+    submitMinigame()
+  }
 })
 
 render()
@@ -250,6 +272,8 @@ function normalizeState(rawState) {
     progress: rawState?.progress || {},
     ownedSkins: Array.isArray(rawState?.ownedSkins) ? rawState.ownedSkins : ['classic'],
     skinUpgrades: rawState?.skinUpgrades || { classic: 1 },
+    minigameQuestions: Array.isArray(rawState?.minigameQuestions) ? rawState.minigameQuestions : [],
+    minigameAnswers: rawState?.minigameAnswers || {},
   }
 
   if (!gradeLabels.includes(normalized.selectedGrade)) {
@@ -293,7 +317,8 @@ function saveAndRender() {
 }
 
 function render() {
-  app.innerHTML = state.screen === 'play' ? renderPractice() : renderSetup()
+  const screen = state.screen === 'play' ? renderPractice() : renderSetup()
+  app.innerHTML = `${screen}${state.minigameOpen ? renderMinigameModal() : ''}`
 }
 
 function renderSetup() {
@@ -376,6 +401,7 @@ function renderSetup() {
 
         <aside class="side-stack" aria-label="Profile and rewards">
           ${renderProfilePanel()}
+          ${renderMinigamePanel()}
           ${renderShopPanel()}
         </aside>
       </main>
@@ -469,6 +495,7 @@ function renderPractice() {
 
         <aside class="side-stack" aria-label="Session rewards">
           ${renderProfilePanel()}
+          ${renderMinigamePanel()}
           ${renderShopPanel()}
         </aside>
       </main>
@@ -596,6 +623,92 @@ function renderShopPanel() {
   `
 }
 
+function renderMinigamePanel() {
+  return `
+    <section class="panel minigame-panel">
+      <div>
+        <p class="eyebrow">Level-up minigame</p>
+        <h2>${state.minigameUnlocked ? 'Unlocked' : 'Locked'}</h2>
+        <p>${
+          state.minigameUnlocked
+            ? 'Solve 3 quick questions for bonus coins.'
+            : 'Reach 100 XP to unlock the minigame.'
+        }</p>
+      </div>
+      <button
+        class="${state.minigameUnlocked ? 'primary-button' : 'ghost-button'}"
+        data-action="open-minigame"
+        ${state.minigameUnlocked ? '' : 'disabled'}
+      >
+        <span class="button-icon">▶</span>
+        Play Minigame
+      </button>
+    </section>
+  `
+}
+
+function renderMinigameModal() {
+  return `
+    <div class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="minigameTitle">
+      <section class="minigame-modal">
+        <div class="modal-heading">
+          <div>
+            <p class="eyebrow">Level ${state.level} bonus</p>
+            <h2 id="minigameTitle">Level-Up Minigame</h2>
+          </div>
+          <button class="modal-close" data-action="close-minigame" aria-label="Close minigame">x</button>
+        </div>
+        <p class="modal-copy">Answer all 3 correctly to earn 50 bonus coins.</p>
+        <div class="mini-question-list">
+          ${state.minigameQuestions.map(renderMinigameQuestion).join('')}
+        </div>
+        <div class="minigame-footer">
+          <p class="${state.minigameResult ? 'mini-result has-result' : 'mini-result'}">
+            ${state.minigameResult ? escapeHtml(state.minigameResult) : 'Choose one answer for each question.'}
+          </p>
+          <button
+            class="primary-button"
+            data-action="submit-minigame"
+            ${state.minigameSubmitted ? 'disabled' : ''}
+          >
+            Submit Answers
+          </button>
+        </div>
+      </section>
+    </div>
+  `
+}
+
+function renderMinigameQuestion(question, index) {
+  return `
+    <article class="mini-question">
+      <p class="question-type">${escapeHtml(question.type)}</p>
+      <h3>${escapeHtml(question.prompt)}</h3>
+      <div class="mini-option-grid">
+        ${question.options
+          .map((option) => renderMinigameOption(option, index, question.answer))
+          .join('')}
+      </div>
+    </article>
+  `
+}
+
+function renderMinigameOption(option, index, answer) {
+  const selected = state.minigameAnswers[index] === option
+  const correct = state.minigameSubmitted && option === answer
+  const wrong = state.minigameSubmitted && selected && option !== answer
+
+  return `
+    <button
+      class="mini-option ${selected ? 'is-selected' : ''} ${correct ? 'is-correct' : ''} ${wrong ? 'is-wrong' : ''}"
+      data-action="select-minigame-answer"
+      data-index="${index}"
+      data-answer="${escapeHtml(option)}"
+      ${state.minigameSubmitted ? 'disabled' : ''}
+    >${escapeHtml(option)}</button>
+  `
+}
+
 function renderShopItem(item) {
   const owned = state.ownedSkins.includes(item.id)
   const active = state.activeSkin === item.id
@@ -717,8 +830,10 @@ function answerQuestion(answer) {
       state.xp += bonusXp
     }
 
-    levelUpIfReady(activeUpgrade)
-    state.feedback = `Correct. +${earnedCoins} coins and +${xpGain + bonusXp} XP.`
+    const levelsGained = levelUpIfReady(activeUpgrade)
+    state.feedback = `Correct. +${earnedCoins} coins and +${xpGain + bonusXp} XP.${
+      levelsGained ? ` Level ${state.level} reached; minigame unlocked.` : ''
+    }`
   } else {
     state.streak = 0
     state.hearts = Math.max(0, state.hearts - 1)
@@ -736,13 +851,26 @@ function answerQuestion(answer) {
 }
 
 function levelUpIfReady(activeUpgrade) {
+  let levelsGained = 0
+
   while (state.xp >= 100) {
     state.xp -= 100
     state.level += 1
+    levelsGained += 1
     const maxHearts = activeUpgrade.maxHearts || 8
     const heartGain = 1 + (activeUpgrade.levelHeartBonus || 0)
     state.hearts = Math.min(maxHearts, state.hearts + heartGain)
   }
+
+  if (levelsGained > 0) {
+    state.minigameUnlocked = true
+    state.minigameQuestions = []
+    state.minigameAnswers = {}
+    state.minigameSubmitted = false
+    state.minigameResult = ''
+  }
+
+  return levelsGained
 }
 
 function resetSession() {
@@ -789,6 +917,73 @@ function upgradeSkin(skinId) {
   state.skinUpgrades[item.id] = getSkinLevel(item.id) + 1
   state.feedback = `${item.name} upgraded to level ${state.skinUpgrades[item.id]}.`
   saveAndRender()
+}
+
+function openMinigame() {
+  if (!state.minigameUnlocked) return
+
+  if (state.minigameQuestions.length !== 3 || state.minigameSubmitted) {
+    state.minigameQuestions = createMinigameQuestions()
+    state.minigameAnswers = {}
+    state.minigameSubmitted = false
+    state.minigameResult = ''
+  }
+
+  state.minigameOpen = true
+  saveAndRender()
+}
+
+function closeMinigame() {
+  state.minigameOpen = false
+
+  if (state.minigameSubmitted) {
+    state.minigameQuestions = []
+    state.minigameAnswers = {}
+    state.minigameSubmitted = false
+    state.minigameResult = ''
+  }
+
+  saveAndRender()
+}
+
+function selectMinigameAnswer(index, answer) {
+  if (state.minigameSubmitted || !state.minigameQuestions[index]) return
+
+  state.minigameAnswers[index] = answer
+  state.minigameResult = ''
+  saveAndRender()
+}
+
+function submitMinigame() {
+  if (state.minigameSubmitted) return
+
+  const answeredCount = state.minigameQuestions.filter((_, index) => state.minigameAnswers[index]).length
+  if (answeredCount < state.minigameQuestions.length) {
+    state.minigameResult = 'Answer all 3 questions before submitting.'
+    saveAndRender()
+    return
+  }
+
+  const correctCount = state.minigameQuestions.filter(
+    (question, index) => state.minigameAnswers[index] === question.answer,
+  ).length
+
+  state.minigameSubmitted = true
+  state.minigameUnlocked = false
+
+  if (correctCount === state.minigameQuestions.length) {
+    state.coins += 50
+    state.minigameResult = 'Perfect! You earned 50 bonus coins.'
+  } else {
+    state.minigameResult = `You got ${correctCount}/3 correct. The next minigame unlocks at your next level.`
+  }
+
+  saveAndRender()
+}
+
+function createMinigameQuestions() {
+  const grade = getGradeNumber(state.selectedGrade)
+  return Array.from({ length: 3 }, () => createQuestion(state.selectedSubject, grade, 'challenge'))
 }
 
 function getActiveSkin() {
