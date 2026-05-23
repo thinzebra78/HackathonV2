@@ -10,6 +10,7 @@ import {
 } from './curriculum.js'
 
 const STORAGE_KEY = 'school-hero-v2-state'
+const QUESTION_SECONDS = 15
 
 const shopItems = [
   {
@@ -147,6 +148,7 @@ const defaultState = {
   xp: 0,
   level: 1,
   currentQuestion: null,
+  timeLeft: QUESTION_SECONDS,
   answered: false,
   feedback: '',
   ownedSkins: ['classic'],
@@ -165,6 +167,7 @@ const defaultState = {
 
 const app = document.querySelector('#app')
 let state = normalizeState(loadState())
+let questionTimerId = null
 
 app.addEventListener('click', (event) => {
   const button = event.target.closest('[data-action]')
@@ -210,13 +213,7 @@ app.addEventListener('click', (event) => {
   }
 
   if (action === 'next-question') {
-    state.currentQuestion = createQuestion(
-      state.selectedSubject,
-      getGradeNumber(state.selectedGrade),
-      state.difficulty,
-    )
-    state.answered = false
-    state.feedback = ''
+    prepareNewQuestion()
     saveAndRender()
   }
 
@@ -292,6 +289,8 @@ function normalizeState(rawState) {
     normalized.difficulty = 'practice'
   }
 
+  normalized.timeLeft = clampTimeLeft(normalized.timeLeft)
+
   if (!normalized.ownedSkins.includes('classic')) {
     normalized.ownedSkins.unshift('classic')
   }
@@ -319,6 +318,7 @@ function saveAndRender() {
 function render() {
   const screen = state.screen === 'play' ? renderPractice() : renderSetup()
   app.innerHTML = `${screen}${state.minigameOpen ? renderMinigameModal() : ''}`
+  scheduleQuestionTimer()
 }
 
 function renderSetup() {
@@ -411,11 +411,7 @@ function renderSetup() {
 
 function renderPractice() {
   if (!state.currentQuestion) {
-    state.currentQuestion = createQuestion(
-      state.selectedSubject,
-      getGradeNumber(state.selectedGrade),
-      state.difficulty,
-    )
+    prepareNewQuestion()
   }
 
   const course = selectedCourse()
@@ -452,19 +448,25 @@ function renderPractice() {
               <p class="eyebrow">Question ${progress.attempted + 1}</p>
               <h1>${subjectMeta[state.selectedSubject].label} Practice</h1>
             </div>
-            <div class="segmented-control" aria-label="Difficulty">
-              ${['practice', 'challenge']
-                .map(
-                  (difficulty) => `
-                    <button
-                      class="${state.difficulty === difficulty ? 'is-selected' : ''}"
-                      data-action="set-difficulty"
-                      data-difficulty="${difficulty}"
-                      aria-pressed="${state.difficulty === difficulty}"
-                    >${titleCase(difficulty)}</button>
-                  `,
-                )
-                .join('')}
+            <div class="practice-controls">
+              <div class="timer-card ${state.timeLeft <= 5 ? 'is-low' : ''}" aria-live="polite">
+                <span>Time</span>
+                <strong>${state.timeLeft}s</strong>
+              </div>
+              <div class="segmented-control" aria-label="Difficulty">
+                ${['practice', 'challenge']
+                  .map(
+                    (difficulty) => `
+                      <button
+                        class="${state.difficulty === difficulty ? 'is-selected' : ''}"
+                        data-action="set-difficulty"
+                        data-difficulty="${difficulty}"
+                        aria-pressed="${state.difficulty === difficulty}"
+                      >${titleCase(difficulty)}</button>
+                    `,
+                  )
+                  .join('')}
+              </div>
             </div>
           </div>
 
@@ -792,18 +794,13 @@ function getCoursePercent(course, progress) {
 function startCourse() {
   state.screen = 'play'
   state.hearts = Math.max(state.hearts, 3)
-  state.feedback = `Started ${selectedCourse().title}.`
-  state.currentQuestion = createQuestion(
-    state.selectedSubject,
-    getGradeNumber(state.selectedGrade),
-    state.difficulty,
-  )
-  state.answered = false
+  prepareNewQuestion(`Started ${selectedCourse().title}.`)
   saveAndRender()
 }
 
 function answerQuestion(answer) {
   if (!state.currentQuestion || state.answered) return
+  clearQuestionTimer()
 
   const progress = progressForCourse()
   const isCorrect = String(answer) === String(state.currentQuestion.answer)
@@ -876,13 +873,85 @@ function levelUpIfReady(activeUpgrade) {
 function resetSession() {
   state.hearts = 5
   state.streak = 0
+  prepareNewQuestion('Session reset. Course progress and coins were kept.')
+  saveAndRender()
+}
+
+function prepareNewQuestion(feedback = '') {
   state.currentQuestion = createQuestion(
     state.selectedSubject,
     getGradeNumber(state.selectedGrade),
     state.difficulty,
   )
+  state.timeLeft = QUESTION_SECONDS
   state.answered = false
-  state.feedback = 'Session reset. Course progress and coins were kept.'
+  state.feedback = feedback
+}
+
+function scheduleQuestionTimer() {
+  clearQuestionTimer()
+
+  if (
+    state.screen !== 'play' ||
+    !state.currentQuestion ||
+    state.answered ||
+    state.minigameOpen
+  ) {
+    return
+  }
+
+  if (state.timeLeft <= 0) {
+    handleQuestionTimeout()
+    return
+  }
+
+  questionTimerId = window.setInterval(() => {
+    if (
+      state.screen !== 'play' ||
+      !state.currentQuestion ||
+      state.answered ||
+      state.minigameOpen
+    ) {
+      clearQuestionTimer()
+      return
+    }
+
+    state.timeLeft = Math.max(0, state.timeLeft - 1)
+
+    if (state.timeLeft === 0) {
+      handleQuestionTimeout()
+    } else {
+      saveAndRender()
+    }
+  }, 1000)
+}
+
+function clearQuestionTimer() {
+  if (!questionTimerId) return
+  window.clearInterval(questionTimerId)
+  questionTimerId = null
+}
+
+function handleQuestionTimeout() {
+  if (!state.currentQuestion || state.answered) return
+
+  clearQuestionTimer()
+  const progress = progressForCourse()
+  state.answered = true
+  state.timeLeft = 0
+  progress.attempted += 1
+  state.streak = 0
+  state.hearts = Math.max(0, state.hearts - 1)
+  state.feedback = `Time is up. Correct answer: ${state.currentQuestion.answer}.`
+
+  if (state.hearts === 0) {
+    state.feedback = 'Time is up and hearts reached zero. Session reset; progress and coins were kept.'
+    state.hearts = 5
+    state.screen = 'setup'
+    state.currentQuestion = null
+    state.timeLeft = QUESTION_SECONDS
+  }
+
   saveAndRender()
 }
 
@@ -1007,6 +1076,12 @@ function getSkinUpgrade(item) {
 
 function getNextSkinUpgrade(item) {
   return item.upgrades[getSkinLevel(item.id)]
+}
+
+function clampTimeLeft(value) {
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed)) return QUESTION_SECONDS
+  return Math.min(QUESTION_SECONDS, Math.max(0, Math.round(parsed)))
 }
 
 function titleCase(value) {

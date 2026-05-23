@@ -649,6 +649,38 @@ ol {
   gap: 16px;
 }
 
+.practice-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.timer-card {
+  min-width: 92px;
+  min-height: 46px;
+  display: grid;
+  align-content: center;
+  padding: 6px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.timer-card span {
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.timer-card strong {
+  color: white;
+  font-size: 1.2rem;
+}
+
+.timer-card.is-low {
+  border-color: rgba(250, 204, 21, 0.72);
+  background: rgba(250, 204, 21, 0.22);
+}
+
 .segmented-control {
   display: inline-grid;
   grid-template-columns: repeat(2, 1fr);
@@ -910,6 +942,11 @@ ol {
   .segmented-control {
     width: 100%;
     min-width: 0;
+  }
+
+  .practice-controls {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .practice-actions {
