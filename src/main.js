@@ -17,28 +17,122 @@ const shopItems = [
     name: 'Classic',
     color: '#d95f4f',
     cost: 0,
-    perk: 'Balanced starter outfit',
+    upgrades: [
+      {
+        perk: 'Balanced starter outfit',
+      },
+      {
+        cost: 60,
+        perk: '+1 coin per correct answer',
+        coinBonus: 1,
+      },
+      {
+        cost: 120,
+        perk: '+1 coin and +3 XP every 3-streak',
+        coinBonus: 1,
+        streakXpBonus: 3,
+      },
+      {
+        cost: 210,
+        perk: '+2 coins, +5 XP every 3-streak, +1 heart on level up',
+        coinBonus: 2,
+        streakXpBonus: 5,
+        levelHeartBonus: 1,
+        maxHearts: 9,
+      },
+    ],
   },
   {
     id: 'summit',
     name: 'Summit',
     color: '#277da1',
     cost: 90,
-    perk: '+2 coins per correct answer',
+    upgrades: [
+      {
+        perk: '+2 coins per correct answer',
+        coinBonus: 2,
+      },
+      {
+        cost: 110,
+        perk: '+4 coins per correct answer',
+        coinBonus: 4,
+      },
+      {
+        cost: 190,
+        perk: '+6 coins and +3 XP every 3-streak',
+        coinBonus: 6,
+        streakXpBonus: 3,
+      },
+      {
+        cost: 320,
+        perk: '+8 coins and +1 heart on level up',
+        coinBonus: 8,
+        levelHeartBonus: 1,
+        maxHearts: 9,
+      },
+    ],
   },
   {
     id: 'sprout',
     name: 'Sprout',
     color: '#43aa8b',
     cost: 140,
-    perk: '+5 XP when a streak reaches 3',
+    upgrades: [
+      {
+        perk: '+5 XP every 3-streak',
+        streakXpBonus: 5,
+      },
+      {
+        cost: 130,
+        perk: '+8 XP every 3-streak',
+        streakXpBonus: 8,
+      },
+      {
+        cost: 220,
+        perk: '+11 XP every 3-streak and +1 coin',
+        streakXpBonus: 11,
+        coinBonus: 1,
+      },
+      {
+        cost: 360,
+        perk: '+14 XP every 3-streak and +2 coins',
+        streakXpBonus: 14,
+        coinBonus: 2,
+      },
+    ],
   },
   {
     id: 'solar',
     name: 'Solar',
     color: '#f9a03f',
     cost: 210,
-    perk: 'Restores one heart on level up',
+    upgrades: [
+      {
+        perk: '+1 extra heart on level up',
+        levelHeartBonus: 1,
+        maxHearts: 9,
+      },
+      {
+        cost: 160,
+        perk: '+2 extra hearts on level up',
+        levelHeartBonus: 2,
+        maxHearts: 10,
+      },
+      {
+        cost: 270,
+        perk: '+3 extra hearts on level up and +1 coin',
+        levelHeartBonus: 3,
+        maxHearts: 11,
+        coinBonus: 1,
+      },
+      {
+        cost: 420,
+        perk: '+4 extra hearts on level up and +2 coins',
+        levelHeartBonus: 4,
+        maxHearts: 12,
+        coinBonus: 2,
+      },
+    ],
   },
 ]
 
@@ -57,6 +151,9 @@ const defaultState = {
   feedback: '',
   ownedSkins: ['classic'],
   activeSkin: 'classic',
+  skinUpgrades: {
+    classic: 1,
+  },
   progress: {},
 }
 
@@ -128,6 +225,10 @@ app.addEventListener('click', (event) => {
   if (action === 'equip-skin') {
     equipSkin(button.dataset.skin)
   }
+
+  if (action === 'upgrade-skin') {
+    upgradeSkin(button.dataset.skin)
+  }
 })
 
 render()
@@ -148,6 +249,7 @@ function normalizeState(rawState) {
     ...rawState,
     progress: rawState?.progress || {},
     ownedSkins: Array.isArray(rawState?.ownedSkins) ? rawState.ownedSkins : ['classic'],
+    skinUpgrades: rawState?.skinUpgrades || { classic: 1 },
   }
 
   if (!gradeLabels.includes(normalized.selectedGrade)) {
@@ -173,6 +275,10 @@ function normalizeState(rawState) {
   if (!normalized.ownedSkins.includes(normalized.activeSkin)) {
     normalized.activeSkin = 'classic'
   }
+
+  normalized.ownedSkins.forEach((skinId) => {
+    normalized.skinUpgrades[skinId] = normalizeSkinLevel(skinId, normalized.skinUpgrades[skinId])
+  })
 
   return normalized
 }
@@ -371,7 +477,7 @@ function renderPractice() {
 }
 
 function renderTopbar(contextLabel) {
-  const activeSkin = shopItems.find((skin) => skin.id === state.activeSkin) || shopItems[0]
+  const activeSkin = getActiveSkin()
 
   return `
     <header class="topbar">
@@ -452,7 +558,9 @@ function renderRailUnit(unit, index, currentUnitIndex) {
 }
 
 function renderProfilePanel() {
-  const activeSkin = shopItems.find((skin) => skin.id === state.activeSkin) || shopItems[0]
+  const activeSkin = getActiveSkin()
+  const level = getSkinLevel(activeSkin.id)
+  const activeUpgrade = getSkinUpgrade(activeSkin)
 
   return `
     <section class="panel profile-panel">
@@ -461,8 +569,8 @@ function renderProfilePanel() {
       </div>
       <div>
         <p class="eyebrow">Hero profile</p>
-        <h2>${activeSkin.name}</h2>
-        <p>${activeSkin.perk}</p>
+        <h2>${activeSkin.name} Lv. ${level}</h2>
+        <p>${activeUpgrade.perk}</p>
       </div>
       <div class="xp-block">
         <span class="metric-label">XP ${state.xp}/100</span>
@@ -492,21 +600,41 @@ function renderShopItem(item) {
   const owned = state.ownedSkins.includes(item.id)
   const active = state.activeSkin === item.id
   const canBuy = state.coins >= item.cost
+  const level = getSkinLevel(item.id)
+  const nextUpgrade = getNextSkinUpgrade(item)
+  const maxed = owned && !nextUpgrade
+  const canUpgrade = owned && nextUpgrade && state.coins >= nextUpgrade.cost
+  const upgradeLabel = maxed ? 'Maxed' : 'Upgrade'
+  const priceLine = owned
+    ? maxed
+      ? 'Max level'
+      : `Upgrade: ${nextUpgrade.cost} coins`
+    : item.cost === 0
+      ? 'Included'
+      : `${item.cost} coins`
 
   return `
     <article class="shop-item ${active ? 'is-active' : ''}">
       <span class="skin-swatch" style="--skin:${item.color}"></span>
-      <div>
-        <h3>${item.name}</h3>
-        <p>${item.perk}</p>
-        <small>${item.cost === 0 ? 'Included' : `${item.cost} coins`}</small>
+      <div class="shop-info">
+        <h3>${item.name} Lv. ${level}</h3>
+        <p>${getSkinUpgrade(item).perk}</p>
+        <small>${priceLine}</small>
       </div>
-      <button
-        class="small-button"
-        data-action="${owned ? 'equip-skin' : 'buy-skin'}"
-        data-skin="${item.id}"
-        ${active || (!owned && !canBuy) ? 'disabled' : ''}
-      >${active ? 'Active' : owned ? 'Equip' : 'Buy'}</button>
+      <div class="shop-actions">
+        <button
+          class="small-button"
+          data-action="${owned ? 'equip-skin' : 'buy-skin'}"
+          data-skin="${item.id}"
+          ${active || (!owned && !canBuy) ? 'disabled' : ''}
+        >${active ? 'Active' : owned ? 'Equip' : 'Buy'}</button>
+        <button
+          class="small-button upgrade-button"
+          data-action="upgrade-skin"
+          data-skin="${item.id}"
+          ${!canUpgrade ? 'disabled' : ''}
+        >${upgradeLabel}</button>
+      </div>
     </article>
   `
 }
@@ -570,24 +698,27 @@ function answerQuestion(answer) {
   progress.attempted += 1
 
   if (isCorrect) {
-    const activeSkin = shopItems.find((skin) => skin.id === state.activeSkin)
+    const activeSkin = getActiveSkin()
+    const activeUpgrade = getSkinUpgrade(activeSkin)
     const baseCoins = state.difficulty === 'challenge' ? 14 : 10
-    const skinCoinBonus = activeSkin?.id === 'summit' ? 2 : 0
+    const skinCoinBonus = activeUpgrade.coinBonus || 0
     const streakBonus = Math.min(state.streak, 5)
     const earnedCoins = baseCoins + skinCoinBonus + streakBonus
     const xpGain = state.difficulty === 'challenge' ? 24 : 18
+    let bonusXp = 0
 
     state.streak += 1
     progress.correct += 1
     state.coins += earnedCoins
     state.xp += xpGain
 
-    if (activeSkin?.id === 'sprout' && state.streak === 3) {
-      state.xp += 5
+    if (activeUpgrade.streakXpBonus && state.streak % 3 === 0) {
+      bonusXp = activeUpgrade.streakXpBonus
+      state.xp += bonusXp
     }
 
-    levelUpIfReady(activeSkin)
-    state.feedback = `Correct. +${earnedCoins} coins and +${xpGain} XP.`
+    levelUpIfReady(activeUpgrade)
+    state.feedback = `Correct. +${earnedCoins} coins and +${xpGain + bonusXp} XP.`
   } else {
     state.streak = 0
     state.hearts = Math.max(0, state.hearts - 1)
@@ -604,11 +735,13 @@ function answerQuestion(answer) {
   saveAndRender()
 }
 
-function levelUpIfReady(activeSkin) {
+function levelUpIfReady(activeUpgrade) {
   while (state.xp >= 100) {
     state.xp -= 100
     state.level += 1
-    state.hearts = Math.min(8, state.hearts + (activeSkin?.id === 'solar' ? 2 : 1))
+    const maxHearts = activeUpgrade.maxHearts || 8
+    const heartGain = 1 + (activeUpgrade.levelHeartBonus || 0)
+    state.hearts = Math.min(maxHearts, state.hearts + heartGain)
   }
 }
 
@@ -631,6 +764,7 @@ function buySkin(skinId) {
 
   state.coins -= item.cost
   state.ownedSkins.push(item.id)
+  state.skinUpgrades[item.id] = 1
   state.activeSkin = item.id
   state.feedback = `${item.name} skin unlocked.`
   saveAndRender()
@@ -642,6 +776,42 @@ function equipSkin(skinId) {
   state.activeSkin = skinId
   state.feedback = `${item?.name || 'Selected'} skin equipped.`
   saveAndRender()
+}
+
+function upgradeSkin(skinId) {
+  const item = shopItems.find((skin) => skin.id === skinId)
+  if (!item || !state.ownedSkins.includes(item.id)) return
+
+  const nextUpgrade = getNextSkinUpgrade(item)
+  if (!nextUpgrade || state.coins < nextUpgrade.cost) return
+
+  state.coins -= nextUpgrade.cost
+  state.skinUpgrades[item.id] = getSkinLevel(item.id) + 1
+  state.feedback = `${item.name} upgraded to level ${state.skinUpgrades[item.id]}.`
+  saveAndRender()
+}
+
+function getActiveSkin() {
+  return shopItems.find((skin) => skin.id === state.activeSkin) || shopItems[0]
+}
+
+function getSkinLevel(skinId) {
+  return normalizeSkinLevel(skinId, state.skinUpgrades[skinId])
+}
+
+function normalizeSkinLevel(skinId, level) {
+  const item = shopItems.find((skin) => skin.id === skinId)
+  const maxLevel = item?.upgrades.length || 1
+  const parsed = Number(level) || 1
+  return Math.min(maxLevel, Math.max(1, parsed))
+}
+
+function getSkinUpgrade(item) {
+  return item.upgrades[getSkinLevel(item.id) - 1] || item.upgrades[0]
+}
+
+function getNextSkinUpgrade(item) {
+  return item.upgrades[getSkinLevel(item.id)]
 }
 
 function titleCase(value) {
